@@ -6,7 +6,7 @@ import os
 class FileHandler(object):
     @classmethod
     def root_dir(cls):
-        
+
         return os.path.dirname(os.path.dirname(__file__))
 
     @classmethod
