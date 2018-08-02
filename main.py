@@ -32,7 +32,7 @@ def usage():
         if project.startswith("sc_") and project.endswith(".py"):
             pro = project.split(".")[0]
             modular = importlib.import_module("projects.%s" % pro)
-            print "\t%-20s%-50s" % (pro[3:], modular.ScriptHandler)
+            print "\t%-20s%-50s" % (pro[3:], modular.ScriptHandler.__doc__)
 
 
 if __name__ == '__main__':
