@@ -15,6 +15,7 @@ def main(argv):
                 modular = importlib.import_module(name)
             except ImportError:
                 print "Cannot find [%s], use -h for help." % argv[1]
+                raise
                 return
             classname = getattr(modular, "ScriptHandler")
             obj = classname()
