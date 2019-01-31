@@ -89,6 +89,8 @@ class ScriptHandler(object):
         try:
             r = requests.get(download_url)
             filename = "{}/videos/{}.mp4".format(self.output, index)
+            if os.path.exists(filename):
+                os.remove(filename)
             with open(filename, "w") as f:
                 f.write(r.content)
         except Exception as ex:
@@ -114,6 +116,8 @@ class ScriptHandler(object):
 
     def extract_audio(self, video):
         audio = "{}.wav".format(video.split(".")[0])
+        if os.path.exists(audio):
+            os.remove(audio)
         cmd = "{} -i {} -ab 160k -ac 2 -ar 44100 -vn {} > /dev/null 2>&1".format(self.ffmpeg, video, audio)
         print "Info: Run cmd: {}".format(cmd)
         os.system(cmd)
