@@ -3,6 +3,7 @@
 import os
 import xlrd
 import xlwt
+import glob
 from optparse import OptionParser
 from youtube_dl import _real_main
 from utils.u_file import FileHandler
@@ -13,7 +14,7 @@ class ScriptHandler(object):
     """部署virtualenv"""
     def __init__(self):
         self.home = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        self.sonic = os.path.join(self.home, "shells/sonic-annotator")
+        self.sonic = "/usr/bin/sonic-annotator"
         self.config = os.path.join(self.home, "configs/tp_match_sp.txt")
 
     def parser_args(self, argv):
@@ -59,16 +60,19 @@ class ScriptHandler(object):
                 path = row[12][1:] if row[12].startswith("/") else row[12]
                 sp_dir = os.path.join(wav_dir, row[12])
                 sp_path = os.path.join(sp_dir, "sp.wav")
-                # tp_path = self.download_youtube(url)
-                tp_path = "/home/sunlf/tmp/wavs/tp.wav"
-                self.rundata(sp_path, tp_path)
+                tp_path = self.download_youtube(url)
+                tmp_csv = self.rundata(sp_path, tp_path)
+                if tmp_csv:
+                    dst_csv = os.path.join(self.output, "csvs/{}.csv".format(curr_row+1))
+                else:
+                    print "make csv error, index={}".format(curr_row+1)
 
     def download_youtube(self, url):
-        # download_url = _real_main(url)
-        # r = requests.get(download_url)
+        download_url = _real_main(url)
+        r = requests.get(download_url)
         filename = "{}/videos/{}.mp4".format(self.output, IdWorker().get_id())
-        # with open(filename, "w") as f:
-        #     f.write(r.content)
+        with open(filename, "w") as f:
+            f.write(r.content)
         return filename
 
     def mkdir_output(self, output):
@@ -77,6 +81,10 @@ class ScriptHandler(object):
         os.mkdir("{}/csvs/".format(output))
 
     def rundata(self, sp, tp):
-        cmd = "/usr/bin/sonic-annotator -t {} -m {} {} -w csv --csv-basedir {}/csvs/".format(self.config, tp, sp, self.output)
-        print cmd
+        csv_tmp = os.path.join(self.home, "tmp")
+        cmd = "{} -t {} -m {} {} -w csv --csv-basedir {}/csvs/".format(self.sonic, self.config, tp, sp, csv_tmp)
         os.system(cmd)
+        csv = os.path.join(csv_tmp, "tp_vamp_match-vamp-plugin_match_b_a.csv")
+        if os.path.exists(csv):
+            return csv
+        return None

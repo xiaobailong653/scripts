@@ -4,7 +4,7 @@
 
 :transform a vamp:Transform ;
     vamp:plugin <http://vamp-plugins.org/rdf/plugins/match-vamp-plugin#match> ;
-    vamp:step_size"220"^^xsd:int ;
+    vamp:step_size"441"^^xsd:int ;
     vamp:block_size "2048"^^xsd:int ; 
     vamp:parameter_binding [
         vamp:parameter [ vamp:identifier "freq1" ] ;
