@@ -68,7 +68,7 @@ class ScriptHandler(object):
         data = [sheet.row_values(0)]
         for curr_row in range(1, num_rows):
             row = sheet.row_values(curr_row)
-            if not row[-2]:
+            if not row[0] and row[1] == "US":
                 index = IdWorker().get_id()
                 if row[0]:
                     url = row[11]
@@ -83,7 +83,7 @@ class ScriptHandler(object):
                             if tmp_csv is not None:
                                 dst_csv = os.path.join(self.output, "csvs/{}.csv".format(index))
                                 os.rename(tmp_csv, dst_csv)
-                                row[-2] = index
+                                row[-2] = str(index)
                                 row[-1] = dst_csv
                                 print "Info: success: index={}".format(index)
                             else:
@@ -101,7 +101,7 @@ class ScriptHandler(object):
         for i in range(len(data)):
             for j in range(len(data[i])):
                 sheet.write(i, j, data[i][j])
-        workbook.save("{}/new.xlsx".format(self.output))
+        workbook.save("{}/result.xls".format(self.output))
 
     def is_match(self, index):
         csv = os.path.join(self.output, "csvs/{}.csv".format(index))
