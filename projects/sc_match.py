@@ -55,20 +55,28 @@ class ScriptHandler(object):
         sheet = workbook.sheet_by_name(u'Sheet1')
         num_rows = sheet.nrows
         for curr_row in range(1, num_rows):
-            row = sheet.row_values(curr_row)
-            if row[0]:
-                url = row[11]
-                path = row[12][1:] if row[12].startswith("/") else row[12]
-                sp_dir = os.path.join(wav_dir, row[12])
-                sp_path = os.path.join(sp_dir, "sp.wav")
-                video_path = self.download_youtube(url, curr_row+1)
-                if video_path is not None:
-                    tp_path = self.extract_audio(video_path)
-                    tmp_csv = self.rundata(sp_path, tp_path)
-                    if tmp_csv is not None:
-                        dst_csv = os.path.join(self.output, "csvs/{}.csv".format(curr_row+1))
-                    else:
-                        print "Error: make csv error, index={}".format(curr_row+1)
+            if not self.is_match(curr_row+1):
+                row = sheet.row_values(curr_row)
+                if row[0]:
+                    url = row[11]
+                    path = row[12][1:] if row[12].startswith("/") else row[12]
+                    sp_dir = os.path.join(wav_dir, row[12])
+                    sp_path = os.path.join(sp_dir, "sp.wav")
+                    video_path = self.download_youtube(url, curr_row+1)
+                    if video_path is not None:
+                        tp_path = self.extract_audio(video_path)
+                        tmp_csv = self.rundata(sp_path, tp_path)
+                        if tmp_csv is not None:
+                            dst_csv = os.path.join(self.output, "csvs/{}.csv".format(curr_row+1))
+                            print "Info: success: index={}".format(curr_row+1)
+                        else:
+                            print "Error: make csv error, index={}".format(curr_row+1)
+
+    def is_match(self, index):
+        csv = os.path.join(self.output, "csvs/{}.csv".format(index))
+        if os.path.exists(csv):
+            return True
+        return False
 
     def download_youtube(self, url, index):
         try:
@@ -92,8 +100,8 @@ class ScriptHandler(object):
         os.mkdir("{}/csvs/".format(output))
 
     def rundata(self, sp, tp):
-        csv_tmp = os.path.join(self.home, "tmp")
-        cmd = "{} -t {} -m {} {} -w csv --csv-basedir {}/csvs/ > /dev/null 2>&1".format(self.sonic, self.config, sp, tp, csv_tmp)
+        csv_tmp = os.path.join(self.home, "tmp/csvs/")
+        cmd = "{} -t {} -m {} {} -w csv --csv-basedir {} > /dev/null 2>&1".format(self.sonic, self.config, sp, tp, csv_tmp)
         print "Info: Run cmd: {}".format(cmd)
         os.system(cmd)
         sp_name = os.path.basename(sp)
