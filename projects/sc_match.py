@@ -4,6 +4,7 @@ import os
 import xlrd
 import xlwt
 import glob
+import requests
 from optparse import OptionParser
 from youtube_dl import _real_main
 from utils.u_file import FileHandler
