@@ -40,7 +40,18 @@ class ScriptHandler(object):
                           default=False,
                           help="Output dir path")
 
+        parser.add_option("-t", "--test",
+                          action="store_true",
+                          dest="test",
+                          default=False,
+                          help="test")
+
         (options, args) = parser.parse_args(argv)
+
+        if options.test:
+            self.test()
+            return
+
         if options.excel and options.wav and options.output:
             if not os.path.exists(options.output):
                 self.mkdir_output(options.output)
@@ -54,25 +65,43 @@ class ScriptHandler(object):
         workbook = xlrd.open_workbook(excel)
         sheet = workbook.sheet_by_name(u'Sheet1')
         num_rows = sheet.nrows
+        data = [sheet.row_values(0)]
         for curr_row in range(1, num_rows):
-            index = curr_row + 1
-            if not self.is_match(index):
-                row = sheet.row_values(curr_row)
+            row = sheet.row_values(curr_row)
+            if not row[-2]:
+                index = IdWorker().get_id()
                 if row[0]:
                     url = row[11]
                     path = row[12][1:] if row[12].startswith("/") else row[12]
                     sp_dir = os.path.join(wav_dir, row[12])
                     sp_path = os.path.join(sp_dir, "sp.wav")
-                    video_path = self.download_youtube(url, index)
-                    if video_path is not None:
-                        tp_path = self.extract_audio(video_path)
-                        tmp_csv = self.rundata(sp_path, tp_path)
-                        if tmp_csv is not None:
-                            dst_csv = os.path.join(self.output, "csvs/{}.csv".format(index))
-                            os.rename(tmp_csv, dst_csv)
-                            print "Info: success: index={}".format(index)
+                    if os.path.exists(sp_path):
+                        video_path = self.download_youtube(url, index)
+                        if video_path is not None:
+                            tp_path = self.extract_audio(video_path)
+                            tmp_csv = self.rundata(sp_path, tp_path)
+                            if tmp_csv is not None:
+                                dst_csv = os.path.join(self.output, "csvs/{}.csv".format(index))
+                                os.rename(tmp_csv, dst_csv)
+                                row[-2] = index
+                                row[-1] = dst_csv
+                                print "Info: success: index={}".format(index)
+                            else:
+                                print "Error: make csv error, index={}".format(index)
                         else:
-                            print "Error: make csv error, index={}".format(index)
+                            print "Error: tp file not exists, index={}".format(index)
+                    else:
+                        print "Error: sp file not exists, index={}".format(index)
+            data.append(row)
+        self.save_result(data)
+
+    def save_result(self, data):
+        workbook = xlwt.Workbook()
+        sheet = workbook.add_sheet(u'Sheet1', cell_overwrite_ok=True)
+        for i in range(len(data)):
+            for j in range(len(data[i])):
+                sheet.write(i, j, data[i][j])
+        workbook.save("{}/new.xlsx".format(self.output))
 
     def is_match(self, index):
         csv = os.path.join(self.output, "csvs/{}.csv".format(index))
@@ -124,3 +153,25 @@ class ScriptHandler(object):
         if os.path.exists(audio):
             return audio
         return None
+
+    def test(self):
+        filename = "/home/sunlf/Documents/ScorePulse.xlsx"
+        workbook = xlrd.open_workbook(filename)
+        sheet = workbook.sheet_by_name(u'Sheet1')
+        colspan = {}
+        for item in sheet.merged_cells:
+            for row in range(item[0], item[1]):
+                for col in range(item[2], item[3]):
+                    # 合并单元格的首格是有值的，所以在这里进行了去重
+                    if (row, col) != (item[0], item[2]):
+                        colspan.update({(row, col): (item[0], item[2])})
+
+        num_rows = sheet.nrows
+        for i in range(1, num_rows):
+            row = sheet.row_values(i)
+            for j in range(len(row)):
+                if not row[j]:
+                    pos = colspan.get((i, j))
+                    if pos is not None:
+                        row[j] = sheet.cell_value(*colspan.get((i, j)))
+            print i, row
