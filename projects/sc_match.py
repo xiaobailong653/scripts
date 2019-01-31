@@ -20,26 +20,25 @@ class ScriptHandler(object):
     def parser_args(self, argv):
         parser = OptionParser()
 
-        parser.add_option("", "--excel",
+        parser.add_option("-e", "--excel",
                           action="store",
                           dest="excel",
                           default=False,
                           help="Input excel path")
 
-        parser.add_option("", "--wav",
+        parser.add_option("-w", "--wav",
                           action="store",
                           dest="wav",
                           default=False,
                           help="Input wav dir path")
 
-        parser.add_option("", "--output",
+        parser.add_option("-o", "--output",
                           action="store",
                           dest="output",
                           default=False,
                           help="Output dir path")
 
         (options, args) = parser.parse_args(argv)
-
         if options.excel and options.wav and options.output:
             if not os.path.exists(options.output):
                 self.mkdir_output(options.output)
