@@ -16,6 +16,7 @@ class ScriptHandler(object):
     def __init__(self):
         self.home = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         self.sonic = "/usr/bin/sonic-annotator"
+        self.ffmpeg = "/usr/bin/ffmpeg"
         self.config = os.path.join(self.home, "configs/tp_match_sp.txt")
 
     def parser_args(self, argv):
@@ -60,17 +61,18 @@ class ScriptHandler(object):
                 path = row[12][1:] if row[12].startswith("/") else row[12]
                 sp_dir = os.path.join(wav_dir, row[12])
                 sp_path = os.path.join(sp_dir, "sp.wav")
-                tp_path = self.download_youtube(url)
+                video_path = self.download_youtube(url, curr_row+1)
+                sp_path = self.extract_audio(video_path)
                 tmp_csv = self.rundata(sp_path, tp_path)
-                if tmp_csv:
+                if tmp_csv is not None:
                     dst_csv = os.path.join(self.output, "csvs/{}.csv".format(curr_row+1))
                 else:
                     print "make csv error, index={}".format(curr_row+1)
 
-    def download_youtube(self, url):
+    def download_youtube(self, url, index):
         download_url = _real_main(url)
         r = requests.get(download_url)
-        filename = "{}/videos/{}.mp4".format(self.output, IdWorker().get_id())
+        filename = "{}/videos/{}_{}.mp4".format(self.output, index, IdWorker().get_id())
         with open(filename, "w") as f:
             f.write(r.content)
         return filename
@@ -82,9 +84,19 @@ class ScriptHandler(object):
 
     def rundata(self, sp, tp):
         csv_tmp = os.path.join(self.home, "tmp")
-        cmd = "{} -t {} -m {} {} -w csv --csv-basedir {}/csvs/".format(self.sonic, self.config, tp, sp, csv_tmp)
+        cmd = "{} -t {} -m {} {} -w csv --csv-basedir {}/csvs/ > /dev/null 2>&1".format(self.sonic, self.config, tp, sp, csv_tmp)
+        print "Run cmd: {}".format(cmd)
         os.system(cmd)
         csv = os.path.join(csv_tmp, "tp_vamp_match-vamp-plugin_match_b_a.csv")
         if os.path.exists(csv):
             return csv
+        return None
+
+    def extract_audio(self, video):
+        audio = "{}.wav".format(video.split(".")[0])
+        cmd = "{} -i {} -ab 160k -ac 2 -ar 44100 -vn {} > /dev/null 2>&1".format(self.ffmpeg, video, audio)
+        print "Run cmd: {}".format(cmd)
+        os.system(cmd)
+        if os.path.exists(audio):
+            return audio
         return None
