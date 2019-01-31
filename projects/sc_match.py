@@ -90,7 +90,7 @@ class ScriptHandler(object):
                     else:
                         print "Error: tp file not exists, index={}".format(index)
                 else:
-                    print "Error: sp file not exists, index={}".format(index)
+                    print "Error: sp file not exists, index={}, path={}".format(index, sp_path)
             data.append(row)
         self.save_result(data)
 
