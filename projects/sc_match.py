@@ -62,19 +62,28 @@ class ScriptHandler(object):
                 sp_dir = os.path.join(wav_dir, row[12])
                 sp_path = os.path.join(sp_dir, "sp.wav")
                 video_path = self.download_youtube(url, curr_row+1)
-                tp_path = self.extract_audio(video_path)
-                tmp_csv = self.rundata(sp_path, tp_path)
-                if tmp_csv is not None:
-                    dst_csv = os.path.join(self.output, "csvs/{}.csv".format(curr_row+1))
-                else:
-                    print "Error: make csv error, index={}".format(curr_row+1)
+                if video_path is not None:
+                    tp_path = self.extract_audio(video_path)
+                    tmp_csv = self.rundata(sp_path, tp_path)
+                    if tmp_csv is not None:
+                        dst_csv = os.path.join(self.output, "csvs/{}.csv".format(curr_row+1))
+                    else:
+                        print "Error: make csv error, index={}".format(curr_row+1)
 
     def download_youtube(self, url, index):
-        download_url = _real_main(url)
-        r = requests.get(download_url)
-        filename = "{}/videos/{}_{}.mp4".format(self.output, index, IdWorker().get_id())
-        with open(filename, "w") as f:
-            f.write(r.content)
+        try:
+            download_url = _real_main(url)
+        except youtube_dl.utils.DownloadError:
+            print "Error: get download url failed, index={}".format(index)
+            return None
+        try:
+            r = requests.get(download_url)
+            filename = "{}/videos/{}.mp4".format(self.output, index)
+            with open(filename, "w") as f:
+                f.write(r.content)
+        except Exception as ex:
+            print "Error: download youtube video failed, index={}".format(index)
+            return None
         return filename
 
     def mkdir_output(self, output):
