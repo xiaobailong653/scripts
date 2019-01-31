@@ -55,22 +55,24 @@ class ScriptHandler(object):
         sheet = workbook.sheet_by_name(u'Sheet1')
         num_rows = sheet.nrows
         for curr_row in range(1, num_rows):
-            if not self.is_match(curr_row+1):
+            index = curr_row + 1
+            if not self.is_match(index):
                 row = sheet.row_values(curr_row)
                 if row[0]:
                     url = row[11]
                     path = row[12][1:] if row[12].startswith("/") else row[12]
                     sp_dir = os.path.join(wav_dir, row[12])
                     sp_path = os.path.join(sp_dir, "sp.wav")
-                    video_path = self.download_youtube(url, curr_row+1)
+                    video_path = self.download_youtube(url, index)
                     if video_path is not None:
                         tp_path = self.extract_audio(video_path)
                         tmp_csv = self.rundata(sp_path, tp_path)
                         if tmp_csv is not None:
-                            dst_csv = os.path.join(self.output, "csvs/{}.csv".format(curr_row+1))
-                            print "Info: success: index={}".format(curr_row+1)
+                            dst_csv = os.path.join(self.output, "csvs/{}.csv".format(index))
+                            os.rename(tmp_csv, dst_csv)
+                            print "Info: success: index={}".format(index)
                         else:
-                            print "Error: make csv error, index={}".format(curr_row+1)
+                            print "Error: make csv error, index={}".format(index)
 
     def is_match(self, index):
         csv = os.path.join(self.output, "csvs/{}.csv".format(index))
