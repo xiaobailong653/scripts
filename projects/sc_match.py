@@ -62,7 +62,7 @@ class ScriptHandler(object):
                 sp_dir = os.path.join(wav_dir, row[12])
                 sp_path = os.path.join(sp_dir, "sp.wav")
                 video_path = self.download_youtube(url, curr_row+1)
-                sp_path = self.extract_audio(video_path)
+                tp_path = self.extract_audio(video_path)
                 tmp_csv = self.rundata(sp_path, tp_path)
                 if tmp_csv is not None:
                     dst_csv = os.path.join(self.output, "csvs/{}.csv".format(curr_row+1))
