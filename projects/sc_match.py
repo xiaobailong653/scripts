@@ -67,7 +67,7 @@ class ScriptHandler(object):
                 if tmp_csv is not None:
                     dst_csv = os.path.join(self.output, "csvs/{}.csv".format(curr_row+1))
                 else:
-                    print "make csv error, index={}".format(curr_row+1)
+                    print "Error: make csv error, index={}".format(curr_row+1)
 
     def download_youtube(self, url, index):
         download_url = _real_main(url)
@@ -84,10 +84,11 @@ class ScriptHandler(object):
 
     def rundata(self, sp, tp):
         csv_tmp = os.path.join(self.home, "tmp")
-        cmd = "{} -t {} -m {} {} -w csv --csv-basedir {}/csvs/ > /dev/null 2>&1".format(self.sonic, self.config, tp, sp, csv_tmp)
-        print "Run cmd: {}".format(cmd)
+        cmd = "{} -t {} -m {} {} -w csv --csv-basedir {}/csvs/ > /dev/null 2>&1".format(self.sonic, self.config, sp, tp, csv_tmp)
+        print "Info: Run cmd: {}".format(cmd)
         os.system(cmd)
-        csv = os.path.join(csv_tmp, "tp_vamp_match-vamp-plugin_match_b_a.csv")
+        sp_name = os.path.basename(sp)
+        csv = os.path.join(csv_tmp, "{}_vamp_match-vamp-plugin_match_b_a.csv".format(sp_name[:-4]))
         if os.path.exists(csv):
             return csv
         return None
@@ -95,7 +96,7 @@ class ScriptHandler(object):
     def extract_audio(self, video):
         audio = "{}.wav".format(video.split(".")[0])
         cmd = "{} -i {} -ab 160k -ac 2 -ar 44100 -vn {} > /dev/null 2>&1".format(self.ffmpeg, video, audio)
-        print "Run cmd: {}".format(cmd)
+        print "Info: Run cmd: {}".format(cmd)
         os.system(cmd)
         if os.path.exists(audio):
             return audio
