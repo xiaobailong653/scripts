@@ -84,6 +84,7 @@ class ScriptHandler(object):
                             os.rename(tmp_csv, dst_csv)
                             row[-2] = str(index)
                             row[-1] = dst_csv
+                            row[0] = 1
                             print "Info: success: index={}".format(index)
                         else:
                             print "Error: make csv error, index={}".format(index)
