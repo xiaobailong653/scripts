@@ -70,9 +70,9 @@ class ScriptHandler(object):
             row = sheet.row_values(curr_row)
             if not row[0] and row[1] == "US":
                 index = IdWorker().get_id()
-                url = row[11]
-                path = row[12][1:] if row[12].startswith("/") else row[12]
-                sp_dir = os.path.join(wav_dir, row[12])
+                url = row[12]
+                path = row[13][1:] if row[13].startswith("/") else row[13]
+                sp_dir = os.path.join(wav_dir, row[13])
                 sp_path = os.path.join(sp_dir, "sp.wav")
                 if os.path.exists(sp_path):
                     video_path = self.download_youtube(url, index)
