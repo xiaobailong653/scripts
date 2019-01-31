@@ -70,28 +70,27 @@ class ScriptHandler(object):
             row = sheet.row_values(curr_row)
             if not row[0] and row[1] == "US":
                 index = IdWorker().get_id()
-                if row[0]:
-                    url = row[11]
-                    path = row[12][1:] if row[12].startswith("/") else row[12]
-                    sp_dir = os.path.join(wav_dir, row[12])
-                    sp_path = os.path.join(sp_dir, "sp.wav")
-                    if os.path.exists(sp_path):
-                        video_path = self.download_youtube(url, index)
-                        if video_path is not None:
-                            tp_path = self.extract_audio(video_path)
-                            tmp_csv = self.rundata(sp_path, tp_path)
-                            if tmp_csv is not None:
-                                dst_csv = os.path.join(self.output, "csvs/{}.csv".format(index))
-                                os.rename(tmp_csv, dst_csv)
-                                row[-2] = str(index)
-                                row[-1] = dst_csv
-                                print "Info: success: index={}".format(index)
-                            else:
-                                print "Error: make csv error, index={}".format(index)
+                url = row[11]
+                path = row[12][1:] if row[12].startswith("/") else row[12]
+                sp_dir = os.path.join(wav_dir, row[12])
+                sp_path = os.path.join(sp_dir, "sp.wav")
+                if os.path.exists(sp_path):
+                    video_path = self.download_youtube(url, index)
+                    if video_path is not None:
+                        tp_path = self.extract_audio(video_path)
+                        tmp_csv = self.rundata(sp_path, tp_path)
+                        if tmp_csv is not None:
+                            dst_csv = os.path.join(self.output, "csvs/{}.csv".format(index))
+                            os.rename(tmp_csv, dst_csv)
+                            row[-2] = str(index)
+                            row[-1] = dst_csv
+                            print "Info: success: index={}".format(index)
                         else:
-                            print "Error: tp file not exists, index={}".format(index)
+                            print "Error: make csv error, index={}".format(index)
                     else:
-                        print "Error: sp file not exists, index={}".format(index)
+                        print "Error: tp file not exists, index={}".format(index)
+                else:
+                    print "Error: sp file not exists, index={}".format(index)
             data.append(row)
         self.save_result(data)
 
