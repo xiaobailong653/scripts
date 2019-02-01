@@ -148,7 +148,7 @@ class ScriptHandler(object):
 
     def rundata(self, sp, tp):
         csv_tmp = os.path.join(self.home, "tmp/csvs/")
-        cmd = "{} -t {} -m {} {} -w csv --csv-basedir {} > /dev/null 2>&1".format(self.sonic, self.config, sp, tp, csv_tmp)
+        cmd = "{} -t {} -m {} {} -w csv --csv-basedir {}".format(self.sonic, self.config, sp, tp, csv_tmp)
         print "Info: Run cmd: {}".format(cmd)
         os.system(cmd)
         sp_name = os.path.basename(sp)
@@ -161,7 +161,7 @@ class ScriptHandler(object):
         audio = "{}.wav".format(video.split(".")[0])
         if os.path.exists(audio):
             os.remove(audio)
-        cmd = "{} -i {} -ab 160k -ac 2 -ar 44100 -vn {} > /dev/null 2>&1".format(self.ffmpeg, video, audio)
+        cmd = "{} -i {} -ab 160k -ac 2 -ar 44100 -vn {}".format(self.ffmpeg, video, audio)
         print "Info: Run cmd: {}".format(cmd)
         os.system(cmd)
         if os.path.exists(audio):
