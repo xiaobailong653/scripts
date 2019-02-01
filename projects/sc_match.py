@@ -158,15 +158,21 @@ class ScriptHandler(object):
         return None
 
     def extract_audio(self, video, start_time, end_time):
-        audio = "{}.wav".format(video.split(".")[0])
-        if os.path.exists(audio):
-            os.remove(audio)
-        cmd = "{} -i {} -ab 160k -ac 2 -ar 44100 -vn {}".format(self.ffmpeg, video, audio)
-        print "Info: Run cmd: {}".format(cmd)
-        os.system(cmd)
-        if os.path.exists(audio):
-            return audio
+        if start_time and end_time:
+            return None
+        else if (not start_time) and (not end_time):
+            audio = "{}.wav".format(video.split(".")[0])
+            if os.path.exists(audio):
+                os.remove(audio)
+            cmd = "{} -i {} -ab 160k -ac 2 -ar 44100 -vn {}".format(self.ffmpeg, video, audio)
+            print "Info: Run cmd: {}".format(cmd)
+            os.system(cmd)
+            if os.path.exists(audio):
+                return audio
         return None
+
+    def split_wav(self, audio, start_time, end_time):
+        cmd = "{} -i input.mp3 -ss hh:mm:ss -t hh:mm:ss -acodec copy output.mp3 "
 
     def get_excel_content(self, sheet):
         colspan = {}
