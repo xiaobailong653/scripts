@@ -160,7 +160,7 @@ class ScriptHandler(object):
     def extract_audio(self, video, start_time, end_time):
         if start_time and end_time:
             return None
-        else if (not start_time) and (not end_time):
+        elif (not start_time) and (not end_time):
             audio = "{}.wav".format(video.split(".")[0])
             if os.path.exists(audio):
                 os.remove(audio)
