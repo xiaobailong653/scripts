@@ -74,6 +74,7 @@ class ScriptHandler(object):
                 path = row[13][1:] if row[13].startswith("/") else row[13]
                 sp_dir = os.path.join(wav_dir, path)
                 sp_path = os.path.join(sp_dir, "sp.wav")
+                print "###Start######{}-{}-{}-{}-{}########".format(row[3], row[4], row[5], row[8], row[10])
                 if os.path.exists(sp_path):
                     video_path = self.download_youtube(url, index)
                     if video_path is not None:
