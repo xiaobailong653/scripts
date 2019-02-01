@@ -28,6 +28,6 @@ case $1 in
             start
             ;;
     *)
-            echo "Usage: bash run.sh [start | stop | status]"
+            echo "Usage: $0 [start | stop | status]"
             ;;
 esac

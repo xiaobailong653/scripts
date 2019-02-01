@@ -65,26 +65,34 @@ class ScriptHandler(object):
         workbook = xlrd.open_workbook(excel)
         sheet = workbook.sheet_by_name(u'Sheet1')
         num_rows = sheet.nrows
-        data = [sheet.row_values(0)]
-        for curr_row in range(1, num_rows):
-            row = sheet.row_values(curr_row)
+        first_row = sheet.row_values(0)
+        index_num = first_row.index("Index")
+        csv_num = first_row.index("CSV")
+        start_num = first_row.index("Start")
+        end_num = first_row.index("End")
+        content = self.get_excel_content(sheet)
+        data = [first_row]
+        for curr_row in range(1, len(content)):
+            row = content[curr_row]
             if not row[0] and row[1] == "US":
                 index = IdWorker().get_id()
                 url = row[12]
                 path = row[13][1:] if row[13].startswith("/") else row[13]
                 sp_dir = os.path.join(wav_dir, path)
                 sp_path = os.path.join(sp_dir, "sp.wav")
-                print "###Start######{}-{}-{}-{}-{}########".format(row[3], row[4], row[5], row[8], row[10])
+                self.show_start_info(row)
                 if os.path.exists(sp_path):
                     video_path = self.download_youtube(url, index)
                     if video_path is not None:
-                        tp_path = self.extract_audio(video_path)
+                        start_time = row[start_num]
+                        end_time = row[end_num]
+                        tp_path = self.extract_audio(video_path, start_time, end_time)
                         tmp_csv = self.rundata(sp_path, tp_path)
                         if tmp_csv is not None:
                             dst_csv = os.path.join(self.output, "csvs/{}.csv".format(index))
                             os.rename(tmp_csv, dst_csv)
-                            row[-2] = str(index)
-                            row[-1] = dst_csv
+                            row[index_num] = str(index)
+                            row[csv_num] = dst_csv
                             row[0] = 1
                             print "Info: success: index={}".format(index)
                         else:
@@ -97,6 +105,9 @@ class ScriptHandler(object):
         print "Info: save result..."
         self.save_result(data)
         print "Info: save result finished"
+
+    def show_start_info(self, row):
+        print "{}Start{}-{}-{}-{}-{}-{}{}".format("#"*5, "#"*5, row[3].strip().encode("utf-8"), row[4].strip().encode("utf-8"), row[5].strip().encode("utf-8"), row[8].strip().encode("utf-8"), row[10].strip().encode("utf-8"), "#"*10)
 
     def save_result(self, data):
         workbook = xlwt.Workbook()
@@ -146,7 +157,7 @@ class ScriptHandler(object):
             return csv
         return None
 
-    def extract_audio(self, video):
+    def extract_audio(self, video, start_time, end_time):
         audio = "{}.wav".format(video.split(".")[0])
         if os.path.exists(audio):
             os.remove(audio)
@@ -156,6 +167,26 @@ class ScriptHandler(object):
         if os.path.exists(audio):
             return audio
         return None
+
+    def get_excel_content(self, sheet):
+        colspan = {}
+        for item in sheet.merged_cells:
+            for row in range(item[0], item[1]):
+                for col in range(item[2], item[3]):
+                    # 合并单元格的首格是有值的，所以在这里进行了去重
+                    if (row, col) != (item[0], item[2]):
+                        colspan.update({(row, col): (item[0], item[2])})
+        data = []
+        num_rows = sheet.nrows
+        for i in range(1, num_rows):
+            row = sheet.row_values(i)
+            for j in range(len(row)):
+                if not row[j]:
+                    pos = colspan.get((i, j))
+                    if pos is not None:
+                        row[j] = sheet.cell_value(*colspan.get((i, j)))
+            data.append(row)
+        return data
 
     def test(self):
         filename = "/home/sunlf/Documents/ScorePulse.xlsx"
