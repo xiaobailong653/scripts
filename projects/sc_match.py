@@ -93,7 +93,9 @@ class ScriptHandler(object):
                 else:
                     print "Error: sp file not exists, index={}, path={}".format(index, sp_path)
             data.append(row)
+        print "Info: save result..."
         self.save_result(data)
+        print "Info: save result finished"
 
     def save_result(self, data):
         workbook = xlwt.Workbook()
