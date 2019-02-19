@@ -48,7 +48,7 @@ class ScriptHandler(object):
 
 
 class PullCodeHandler(tornado.web.RequestHandler):
-    def get(self, path):
+    def post(self, path):
         workspace = self._get_workspace(path)
         print workspace
         os.chdir(workspace)
